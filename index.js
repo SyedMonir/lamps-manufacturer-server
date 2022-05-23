@@ -21,12 +21,26 @@ async function run() {
   try {
     await client.connect();
     console.log('Connected to MongoDB');
-    const collection = client.db('partCollection').collection('parts');
+    const partCollection = client.db('partCollection').collection('parts');
+    const userCollection = client.db('partCollection').collection('users');
 
     // All Parts API
     app.get('/parts', async (req, res) => {
-      const parts = await collection.find().toArray();
+      const parts = await partCollection.find().toArray();
       res.send(parts);
+    });
+
+    // User PUT
+    app.put('/user/:email', async (req, res) => {
+      const email = req.params.email;
+      const user = req.body;
+      const filter = { email };
+      const options = { upsert: true };
+      const updateDoc = {
+        $set: { ...user },
+      };
+      const result = await userCollection.updateOne(filter, updateDoc, options);
+      res.send(result);
     });
   } finally {
     console.log('Connection closed from run');
