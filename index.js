@@ -3,6 +3,7 @@ const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
 const { MongoClient, ServerApiVersion } = require('mongodb');
+const { ObjectID } = require('bson');
 const app = express();
 const port = process.env.PORT || 5000;
 
@@ -30,14 +31,22 @@ async function run() {
       res.send(parts);
     });
 
+    // Part API
+    app.get('/parts/:partID', async (req, res) => {
+      const id = req.params.partID;
+      console.log(id);
+      const part = await partCollection.findOne({ _id: ObjectID(id) });
+      res.send(part);
+    });
+
     // User PUT
     app.put('/user/:email', async (req, res) => {
       const email = req.params.email;
       const user = req.body;
-      const filter = { email };
+      const filter = { email: email };
       const options = { upsert: true };
       const updateDoc = {
-        $set: { ...user },
+        $set: user,
       };
       const result = await userCollection.updateOne(filter, updateDoc, options);
       res.send(result);
