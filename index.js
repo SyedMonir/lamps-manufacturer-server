@@ -89,8 +89,24 @@ async function run() {
       const purchases = await purchaseCollection
         .find({ email: email })
         .toArray();
-      console.log(purchases);
+      // console.log(purchases);
       res.send(purchases);
+    });
+
+    // Purchase One Get API
+    app.get('/purchase/:email/:partID', async (req, res) => {
+      const partID = req.params.partID;
+      const purchase = await purchaseCollection.findOne({
+        _id: ObjectId(partID),
+      });
+      res.send(purchase);
+    });
+
+    // Purchase Delete API
+    app.delete('/purchase/:id', async (req, res) => {
+      const query = { _id: ObjectId(req.params.id) };
+      const result = await purchaseCollection.deleteOne(query);
+      res.send(result);
     });
   } finally {
     console.log('Connection closed from run');
