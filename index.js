@@ -24,6 +24,9 @@ async function run() {
     console.log('Connected to MongoDB');
     const partCollection = client.db('partCollection').collection('parts');
     const userCollection = client.db('partCollection').collection('users');
+    const purchaseCollection = client
+      .db('partCollection')
+      .collection('purchases');
 
     // All Parts API
     app.get('/parts', async (req, res) => {
@@ -34,7 +37,6 @@ async function run() {
     // Part API
     app.get('/parts/:partID', async (req, res) => {
       const id = req.params.partID;
-      console.log(id);
       const part = await partCollection.findOne({ _id: ObjectID(id) });
       res.send(part);
     });
@@ -51,6 +53,38 @@ async function run() {
       const result = await userCollection.updateOne(filter, updateDoc, options);
       res.send(result);
     });
+
+    // User GET
+    // app.get('/user/:email', async (req, res) => {
+    //   const email = req.params.email;
+    //   const user = await userCollection.findOne({ email: email });
+    //   console.log({ user });
+    //   res.send({ user });
+    // });
+
+    // Purchase Post
+    app.post('/purchase', async (req, res) => {
+      const purchase = req.body;
+      const result = await purchaseCollection.insertOne(purchase);
+      res.send(result);
+    });
+
+    // Purchase Update
+    // app.put('/purchase/:purchaseID', async (req, res) => {
+    //   const purchaseID = req.params.purchaseID;
+    //   const purchase = req.body;
+    //   const filter = { _id: ObjectID(purchaseID) };
+    //   const updateDoc = {
+    //     $set: purchase,
+    //   };
+    //   const options = { upsert: true };
+    //   const result = await purchaseCollection.updateOne(
+    //     filter,
+    //     updateDoc,
+    //     options
+    //   );
+    //   res.send(result);
+    // });
   } finally {
     console.log('Connection closed from run');
   }
