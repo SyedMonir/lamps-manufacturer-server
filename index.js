@@ -2,6 +2,7 @@
 const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
+const jwt = require('jsonwebtoken');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const app = express();
 const port = process.env.PORT || 5000;
@@ -9,6 +10,23 @@ const port = process.env.PORT || 5000;
 // Middleware
 app.use(cors());
 app.use(express.json());
+
+// Verify Token
+const verifyToken = (req, res, next) => {
+  const bearerHeader = req.headers.authorization;
+  if (!bearerHeader) {
+    return res.status(401).send('Unauthorized');
+  }
+  const token = bearerHeader.split(' ')[1];
+
+  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, function (err, decoded) {
+    if (err) {
+      return res.status(403).send('Forbidden');
+    }
+    req.decoded = decoded;
+  });
+  next();
+};
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DV_PASS}@cluster0.pqjmp.mongodb.net/?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, {
@@ -65,7 +83,14 @@ async function run() {
         $set: user,
       };
       const result = await userCollection.updateOne(filter, updateDoc, options);
-      res.send(result);
+      const token = jwt.sign(
+        { email: email },
+        process.env.ACCESS_TOKEN_SECRET,
+        {
+          expiresIn: 3600,
+        }
+      );
+      res.send({ result, token });
     });
 
     // User GET API
