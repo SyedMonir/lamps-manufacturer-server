@@ -2,8 +2,7 @@
 const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
-const { MongoClient, ServerApiVersion } = require('mongodb');
-const { ObjectID } = require('bson');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const app = express();
 const port = process.env.PORT || 5000;
 
@@ -37,11 +36,26 @@ async function run() {
     // Part API
     app.get('/parts/:partID', async (req, res) => {
       const id = req.params.partID;
-      const part = await partCollection.findOne({ _id: ObjectID(id) });
+      const part = await partCollection.findOne({ _id: ObjectId(id) });
       res.send(part);
     });
 
-    // User PUT
+    // Part Update API
+    // app.put('/parts/:partID', async (req, res) => {
+    //   const id = req.params.partID;
+    //   const part = req.body;
+    //   await partCollection.updateOne(
+    //     { _id: ObjectId(id) },
+    //     {
+    //       $set: {
+    //         quantity: part.updatedQuantity,
+    //       },
+    //     }
+    //   );
+    //   res.send(part);
+    // });
+
+    // User PUT API
     app.put('/user/:email', async (req, res) => {
       const email = req.params.email;
       const user = req.body;
@@ -54,7 +68,7 @@ async function run() {
       res.send(result);
     });
 
-    // User GET
+    // User GET API
     // app.get('/user/:email', async (req, res) => {
     //   const email = req.params.email;
     //   const user = await userCollection.findOne({ email: email });
@@ -62,29 +76,22 @@ async function run() {
     //   res.send({ user });
     // });
 
-    // Purchase Post
+    // Purchase Post API
     app.post('/purchase', async (req, res) => {
       const purchase = req.body;
       const result = await purchaseCollection.insertOne(purchase);
       res.send(result);
     });
 
-    // Purchase Update
-    // app.put('/purchase/:purchaseID', async (req, res) => {
-    //   const purchaseID = req.params.purchaseID;
-    //   const purchase = req.body;
-    //   const filter = { _id: ObjectID(purchaseID) };
-    //   const updateDoc = {
-    //     $set: purchase,
-    //   };
-    //   const options = { upsert: true };
-    //   const result = await purchaseCollection.updateOne(
-    //     filter,
-    //     updateDoc,
-    //     options
-    //   );
-    //   res.send(result);
-    // });
+    // Purchase GET API
+    app.get('/purchase/:email', async (req, res) => {
+      const email = req.params.email;
+      const purchases = await purchaseCollection
+        .find({ email: email })
+        .toArray();
+      console.log(purchases);
+      res.send(purchases);
+    });
   } finally {
     console.log('Connection closed from run');
   }
