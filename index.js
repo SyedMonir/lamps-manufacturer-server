@@ -117,12 +117,12 @@ async function run() {
     });
 
     // User GET API
-    // app.get('/user/:email', async (req, res) => {
-    //   const email = req.params.email;
-    //   const user = await userCollection.findOne({ email: email });
-    //   console.log({ user });
-    //   res.send({ user });
-    // });
+    app.get('/user/:email', async (req, res) => {
+      const email = req.params.email;
+      const user = await userCollection.findOne({ email: email });
+      // console.log({ user });
+      res.send({ user });
+    });
 
     // Purchase Post API
     app.post('/purchase', verifyJWT, async (req, res) => {
