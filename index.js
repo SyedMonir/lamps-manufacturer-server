@@ -4,6 +4,8 @@ const cors = require('cors');
 require('dotenv').config();
 const jwt = require('jsonwebtoken');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
+// Stripe
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const app = express();
 const port = process.env.PORT || 5000;
 
@@ -45,6 +47,23 @@ async function run() {
       .db('partCollection')
       .collection('purchases');
 
+    // Payment
+    app.post('/create-payment-intent', verifyJWT, async (req, res) => {
+      const { price } = req.body;
+      const amount = price * 100;
+
+      // Create a PaymentIntent with the order amount and currency
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: amount,
+        currency: 'usd',
+        payment_method_types: ['card'],
+      });
+
+      res.send({
+        clientSecret: paymentIntent.client_secret,
+      });
+    });
+
     // All Parts API
     app.get('/parts', async (req, res) => {
       const parts = await partCollection.find().toArray();
@@ -52,7 +71,7 @@ async function run() {
     });
 
     // Part API
-    app.get('/parts/:partID', verifyJWT, async (req, res) => {
+    app.get('/parts/:partID', async (req, res) => {
       const id = req.params.partID;
       const part = await partCollection.findOne({ _id: ObjectId(id) });
       res.send(part);
@@ -87,7 +106,7 @@ async function run() {
         { email: email },
         process.env.ACCESS_TOKEN_SECRET,
         {
-          expiresIn: 3600,
+          expiresIn: '1d',
         }
       );
       res.send({ result, token });
