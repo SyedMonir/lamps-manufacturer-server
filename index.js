@@ -12,7 +12,7 @@ app.use(cors());
 app.use(express.json());
 
 // Verify Token
-const verifyToken = (req, res, next) => {
+const verifyJWT = (req, res, next) => {
   const bearerHeader = req.headers.authorization;
   if (!bearerHeader) {
     return res.status(401).send('Unauthorized');
@@ -52,7 +52,7 @@ async function run() {
     });
 
     // Part API
-    app.get('/parts/:partID', async (req, res) => {
+    app.get('/parts/:partID', verifyJWT, async (req, res) => {
       const id = req.params.partID;
       const part = await partCollection.findOne({ _id: ObjectId(id) });
       res.send(part);
@@ -102,14 +102,14 @@ async function run() {
     // });
 
     // Purchase Post API
-    app.post('/purchase', async (req, res) => {
+    app.post('/purchase', verifyJWT, async (req, res) => {
       const purchase = req.body;
       const result = await purchaseCollection.insertOne(purchase);
       res.send(result);
     });
 
     // Purchase GET API
-    app.get('/purchase/:email', async (req, res) => {
+    app.get('/purchase/:email', verifyJWT, async (req, res) => {
       const email = req.params.email;
       const purchases = await purchaseCollection
         .find({ email: email })
@@ -119,7 +119,7 @@ async function run() {
     });
 
     // Purchase One Get API
-    app.get('/purchase/:email/:partID', async (req, res) => {
+    app.get('/purchase/:email/:partID', verifyJWT, async (req, res) => {
       const partID = req.params.partID;
       const purchase = await purchaseCollection.findOne({
         _id: ObjectId(partID),
@@ -128,7 +128,7 @@ async function run() {
     });
 
     // Purchase Delete API
-    app.delete('/purchase/:id', async (req, res) => {
+    app.delete('/purchase/:id', verifyJWT, async (req, res) => {
       const query = { _id: ObjectId(req.params.id) };
       const result = await purchaseCollection.deleteOne(query);
       res.send(result);
