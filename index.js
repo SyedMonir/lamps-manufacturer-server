@@ -51,6 +51,19 @@ async function run() {
       .db('partCollection')
       .collection('purchases');
 
+    // Verify Admin
+    const verifyAdmin = async (req, res, next) => {
+      const requestedUser = req?.decoded?.email;
+      // console.log(requestedUser);
+      const isAdmin = await userCollection.findOne({ email: requestedUser });
+      // console.log(isAdmin);
+      if (isAdmin?.role === 'admin') {
+        next();
+      } else {
+        return res.status(403).send('Forbidden');
+      }
+    };
+
     // Payment
     app.post('/create-payment-intent', verifyJWT, async (req, res) => {
       const { price } = req.body;
@@ -131,17 +144,17 @@ async function run() {
     });
 
     // Make Admin
-    app.put('/user/admin/:email', verifyJWT, async (req, res) => {
+    app.put('/user/admin/:email', verifyJWT, verifyAdmin, async (req, res) => {
       const email = req.params.email;
       const filter = { email: email };
-      console.log(filter);
+      // console.log(filter);
       const updateDoc = {
         $set: {
           role: 'admin',
         },
       };
       const result = await userCollection.updateOne(filter, updateDoc);
-      console.log(result);
+      // console.log(result);
       res.send(result);
     });
 
