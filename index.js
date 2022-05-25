@@ -124,6 +124,27 @@ async function run() {
       res.send({ user });
     });
 
+    // User All Get API
+    app.get('/user', verifyJWT, async (req, res) => {
+      const users = await userCollection.find().toArray();
+      res.send(users);
+    });
+
+    // Make Admin
+    app.put('/user/admin/:email', verifyJWT, async (req, res) => {
+      const email = req.params.email;
+      const filter = { email: email };
+      console.log(filter);
+      const updateDoc = {
+        $set: {
+          role: 'admin',
+        },
+      };
+      const result = await userCollection.updateOne(filter, updateDoc);
+      console.log(result);
+      res.send(result);
+    });
+
     // Purchase Post API
     app.post('/purchase', verifyJWT, async (req, res) => {
       const purchase = req.body;
