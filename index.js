@@ -43,6 +43,7 @@ async function run() {
     console.log('Connected to MongoDB');
     const partCollection = client.db('partCollection').collection('parts');
     const userCollection = client.db('partCollection').collection('users');
+    const reviewCollection = client.db('partCollection').collection('reviews');
     const paymentCollection = client
       .db('partCollection')
       .collection('payments');
@@ -175,6 +176,19 @@ async function run() {
       const query = { _id: ObjectId(req.params.id) };
       const result = await purchaseCollection.deleteOne(query);
       res.send(result);
+    });
+
+    // Review Post API
+    app.post('/review', verifyJWT, async (req, res) => {
+      const review = req.body;
+      const result = await reviewCollection.insertOne(review);
+      res.send(result);
+    });
+
+    // Review GET ALL API
+    app.get('/review', async (req, res) => {
+      const reviews = await reviewCollection.find().toArray();
+      res.send(reviews);
     });
   } finally {
     console.log('Connection closed from run');
