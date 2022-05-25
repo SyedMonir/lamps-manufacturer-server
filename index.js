@@ -158,6 +158,15 @@ async function run() {
       res.send(result);
     });
 
+    // Get  Admins
+    app.get('/user/admin/:email', verifyJWT, async (req, res) => {
+      const email = req.params.email;
+      const user = await userCollection.findOne({ email: email });
+      const isAdmin = user?.role === 'admin';
+      // console.log(isAdmin);
+      res.send({ admin: isAdmin });
+    });
+
     // Purchase Post API
     app.post('/purchase', verifyJWT, async (req, res) => {
       const purchase = req.body;
