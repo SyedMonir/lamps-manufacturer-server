@@ -43,6 +43,9 @@ async function run() {
     console.log('Connected to MongoDB');
     const partCollection = client.db('partCollection').collection('parts');
     const userCollection = client.db('partCollection').collection('users');
+    const paymentCollection = client
+      .db('partCollection')
+      .collection('payments');
     const purchaseCollection = client
       .db('partCollection')
       .collection('purchases');
@@ -144,6 +147,27 @@ async function run() {
         _id: ObjectId(partID),
       });
       res.send(purchase);
+    });
+
+    // Purchase Update API
+    app.patch('/purchase/:email/:partID', verifyJWT, async (req, res) => {
+      const partID = req.params.partID;
+      const purchase = req.body;
+      // console.log(purchase);
+      const filter = { _id: ObjectId(partID) };
+      const updateDoc = {
+        $set: {
+          paid: true,
+          transactionId: purchase.transitionId,
+        },
+      };
+      const result = await paymentCollection.insertOne(purchase);
+      const updateBooking = await purchaseCollection.updateOne(
+        filter,
+        updateDoc
+      );
+      // console.log(result, updateBooking);
+      res.send(updateBooking);
     });
 
     // Purchase Delete API
