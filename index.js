@@ -189,6 +189,13 @@ async function run() {
       res.send(result);
     });
 
+    // Purchase Get All API
+    app.get('/purchase', verifyJWT, verifyAdmin, async (req, res) => {
+      const purchases = await purchaseCollection.find().toArray();
+      console.log(purchases);
+      res.send(purchases);
+    });
+
     // Purchase GET API
     app.get('/purchase/:email', verifyJWT, async (req, res) => {
       const email = req.params.email;
