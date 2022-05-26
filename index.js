@@ -94,6 +94,21 @@ async function run() {
       res.send(part);
     });
 
+    // Create Part API
+    app.post('/parts', verifyJWT, verifyAdmin, async (req, res) => {
+      // console.log(req.body);
+      const { name, description, price, image, quantity } = req.body;
+      const newPart = {
+        name,
+        description,
+        price,
+        image,
+        quantity,
+      };
+      const result = await partCollection.insertOne(newPart);
+      res.send(result);
+    });
+
     // Part Update API
     // app.put('/parts/:partID', async (req, res) => {
     //   const id = req.params.partID;
