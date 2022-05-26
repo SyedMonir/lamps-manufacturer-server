@@ -192,7 +192,7 @@ async function run() {
     // Purchase Get All API
     app.get('/purchase', verifyJWT, verifyAdmin, async (req, res) => {
       const purchases = await purchaseCollection.find().toArray();
-      console.log(purchases);
+      // console.log(purchases);
       res.send(purchases);
     });
 
@@ -235,6 +235,26 @@ async function run() {
       // console.log(result, updateBooking);
       res.send(updateBooking);
     });
+
+    // Purchase Shipped API
+    app.patch(
+      '/purchase/shipped/:email/:partID',
+      verifyJWT,
+      verifyAdmin,
+      async (req, res) => {
+        const partID = req.params.partID;
+        console.log(partID);
+        const filter = { _id: ObjectId(partID) };
+        const updateDoc = {
+          $set: {
+            isShipped: true,
+          },
+        };
+        const result = await purchaseCollection.updateOne(filter, updateDoc);
+        console.log(result);
+        res.send(result);
+      }
+    );
 
     // Purchase Delete API
     app.delete('/purchase/:id', verifyJWT, async (req, res) => {
