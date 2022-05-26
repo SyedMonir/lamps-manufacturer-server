@@ -94,6 +94,13 @@ async function run() {
       res.send(part);
     });
 
+    // Delete Part API
+    app.delete('/parts/:partID', verifyJWT, verifyAdmin, async (req, res) => {
+      const id = req.params.partID;
+      const result = await partCollection.deleteOne({ _id: ObjectId(id) });
+      res.send(result);
+    });
+
     // Create Part API
     app.post('/parts', verifyJWT, verifyAdmin, async (req, res) => {
       // console.log(req.body);
